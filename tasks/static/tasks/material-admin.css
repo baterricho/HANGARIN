@@ -936,7 +936,7 @@ a {
     min-height: 100vh;
     padding: 1.6rem;
     background:
-        linear-gradient(135deg, rgba(5, 14, 30, 0.34), rgba(10, 26, 52, 0.42)),
+        linear-gradient(135deg, rgba(5, 14, 30, 0.18), rgba(10, 26, 52, 0.24)),
         url("login-background-gemini.png") center / cover no-repeat;
 }
 
@@ -945,8 +945,8 @@ a {
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(circle at top left, rgba(255, 255, 255, 0.12), transparent 20%),
-        linear-gradient(180deg, rgba(5, 9, 18, 0.1), rgba(5, 9, 18, 0.34));
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent 20%),
+        linear-gradient(180deg, rgba(5, 9, 18, 0.02), rgba(5, 9, 18, 0.14));
 }
 
 .login-shell {
@@ -967,10 +967,10 @@ a {
 
 .login-card {
     width: min(100%, 420px);
-    border-color: rgba(255, 255, 255, 0.18);
-    background: rgba(10, 18, 30, 0.14);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 20px 50px rgba(3, 8, 18, 0.22);
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(10, 18, 30, 0.08);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 16px 38px rgba(3, 8, 18, 0.16);
 }
 
 .login-card__header {
@@ -993,10 +993,10 @@ a {
 }
 
 .login-card .form-control {
-    border-color: rgba(255, 255, 255, 0.28);
-    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.015);
     color: #fff;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .login-card .form-control::placeholder {
@@ -1010,24 +1010,24 @@ a {
 
 .login-card .button--primary,
 .login-card .social-button {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.015);
+    backdrop-filter: blur(8px);
     box-shadow: none;
 }
 
 .login-card .button--primary {
-    border-color: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.22);
     color: #fff;
 }
 
 .login-card .button--primary:hover,
 .login-card .social-button:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .login-card .message {
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(13, 22, 38, 0.16);
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(13, 22, 38, 0.08);
     color: #fff;
 }
 
