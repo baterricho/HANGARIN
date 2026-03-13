@@ -4,20 +4,6 @@
     <section class="hero-card hero-card--feature">
         <div class="hero-card__body">
             <h3>Welcome back, {{ request.user.get_short_name|default:request.user.username }}</h3>
-            <p class="hero-card__copy">
-                Today is {{ today|date:"l, F j, Y" }}. Monitor task flow, recent movement,
-                and deadline pressure from one admin surface.
-            </p>
-            <div class="hero-actions">
-                <a class="button button--primary" href="{% url 'tasks:task-list' %}">
-                    <span class="material-symbols-rounded">view_kanban</span>
-                    <span>View Tasks</span>
-                </a>
-                <a class="button button--ghost" href="{% url 'tasks:task-create' %}">
-                    <span class="material-symbols-rounded">add_circle</span>
-                    <span>Create Task</span>
-                </a>
-            </div>
         </div>
         <div class="hero-stack">
             {% for metric in support_metrics %}
