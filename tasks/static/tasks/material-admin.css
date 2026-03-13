@@ -936,7 +936,7 @@ a {
     min-height: 100vh;
     padding: 1.6rem;
     background:
-        linear-gradient(135deg, rgba(5, 14, 30, 0.18), rgba(10, 26, 52, 0.24)),
+        linear-gradient(135deg, rgba(5, 14, 30, 0.08), rgba(10, 26, 52, 0.12)),
         url("login-background-gemini.png") center / cover no-repeat;
 }
 
@@ -945,8 +945,8 @@ a {
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent 20%),
-        linear-gradient(180deg, rgba(5, 9, 18, 0.02), rgba(5, 9, 18, 0.14));
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.06), transparent 20%),
+        linear-gradient(180deg, rgba(5, 9, 18, 0.01), rgba(5, 9, 18, 0.06));
 }
 
 .login-shell {
@@ -967,10 +967,10 @@ a {
 
 .login-card {
     width: min(100%, 420px);
-    border-color: rgba(255, 255, 255, 0.14);
-    background: rgba(10, 18, 30, 0.08);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 16px 38px rgba(3, 8, 18, 0.16);
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(10, 18, 30, 0.035);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 10px 24px rgba(3, 8, 18, 0.1);
 }
 
 .login-card__header {
@@ -993,11 +993,11 @@ a {
 }
 
 .login-card .form-control {
-    border-color: rgba(255, 255, 255, 0.22);
-    background: rgba(255, 255, 255, 0.01);
-    background-color: rgba(255, 255, 255, 0.01);
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.003);
+    background-color: rgba(255, 255, 255, 0.003);
     color: #fff;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .login-card .form-control::placeholder {
@@ -1005,8 +1005,8 @@ a {
 }
 
 .login-card .form-control:focus {
-    border-color: rgba(255, 255, 255, 0.6);
-    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.34);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
 }
 
 .login-card .form-control:-webkit-autofill,
@@ -1016,31 +1016,31 @@ a {
     -webkit-text-fill-color: #fff !important;
     caret-color: #fff;
     transition: background-color 9999s ease-in-out 0s;
-    -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.01) inset !important;
-    box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.01) inset !important;
-    border-color: rgba(255, 255, 255, 0.22) !important;
+    -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.003) inset !important;
+    box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.003) inset !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
 }
 
 .login-card .button--primary,
 .login-card .social-button {
-    background: rgba(255, 255, 255, 0.015);
-    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.006);
+    backdrop-filter: blur(4px);
     box-shadow: none;
 }
 
 .login-card .button--primary {
-    border-color: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.16);
     color: #fff;
 }
 
 .login-card .button--primary:hover,
 .login-card .social-button:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .login-card .message {
-    border-color: rgba(255, 255, 255, 0.14);
-    background: rgba(13, 22, 38, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(13, 22, 38, 0.035);
     color: #fff;
 }
 
