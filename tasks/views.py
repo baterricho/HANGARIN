@@ -26,7 +26,6 @@ NAVIGATION = (
     {"section": "categories", "label": "Categories", "icon": "category", "url_name": "tasks:category-list"},
     {"section": "priorities", "label": "Priorities", "icon": "flag", "url_name": "tasks:priority-list"},
     {"section": "notes", "label": "Notes", "icon": "sticky_note_2", "url_name": "tasks:note-list"},
-    {"section": "admin", "label": "Admin", "icon": "admin_panel_settings", "url_name": "admin:index"},
 )
 
 
