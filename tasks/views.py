@@ -18,6 +18,7 @@ from .forms import (
     TaskForm,
 )
 from .models import Category, Note, Priority, StatusChoices, SubTask, Task
+from .social_profiles import resolve_user_avatar_text, resolve_user_display_name
 
 NAVIGATION = (
     {"section": "dashboard", "label": "Dashboard", "icon": "dashboard", "url_name": "tasks:dashboard"},
@@ -107,6 +108,8 @@ class FrontendContextMixin(LoginRequiredMixin):
                 "page_description": self.page_description,
                 "nav_items": self.get_nav_items(),
                 "today": timezone.localdate(),
+                "user_display_name": resolve_user_display_name(self.request.user),
+                "user_avatar_text": resolve_user_avatar_text(self.request.user),
             }
         )
         return context

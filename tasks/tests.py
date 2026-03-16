@@ -2,10 +2,14 @@ from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.test.client import RequestFactory
 from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from allauth.socialaccount.models import SocialAccount, SocialLogin
+
+from .adapters import HangarinSocialAccountAdapter
 from .models import Category, Note, Priority, StatusChoices, SubTask, Task
 
 
@@ -135,3 +139,53 @@ class FrontendViewTests(TestCase):
         )
         self.assertRedirects(response, reverse("tasks:task-list"))
         self.assertTrue(Task.objects.filter(title="Launch safety review").exists())
+
+    def test_dashboard_uses_social_account_name_when_user_fields_are_blank(self):
+        social_user = get_user_model().objects.create_user(
+            username="richo",
+            email="richo@example.com",
+            password="safe-password-123",
+        )
+        SocialAccount.objects.create(
+            user=social_user,
+            provider="github",
+            uid="github-1",
+            extra_data={
+                "login": "richo",
+                "name": "Richo Baterzal",
+                "email": "richo@example.com",
+            },
+        )
+
+        self.client.force_login(social_user)
+        response = self.client.get(reverse("tasks:dashboard"))
+
+        self.assertContains(response, "<strong>Richo Baterzal</strong>", html=True)
+        self.assertContains(response, '<span class="user-pill__avatar">R</span>', html=True)
+
+    def test_social_adapter_updates_existing_user_name_from_social_profile(self):
+        social_user = get_user_model().objects.create_user(
+            username="richo",
+            email="richo@example.com",
+            password="safe-password-123",
+        )
+        sociallogin = SocialLogin(
+            user=social_user,
+            account=SocialAccount(
+                provider="google",
+                uid="google-1",
+                extra_data={
+                    "name": "Richo Baterzal",
+                    "given_name": "Richo",
+                    "family_name": "Baterzal",
+                    "email": "richo@example.com",
+                },
+            ),
+        )
+
+        adapter = HangarinSocialAccountAdapter()
+        adapter.pre_social_login(RequestFactory().get("/accounts/google/login/"), sociallogin)
+        social_user.refresh_from_db()
+
+        self.assertEqual(social_user.first_name, "Richo")
+        self.assertEqual(social_user.last_name, "Baterzal")

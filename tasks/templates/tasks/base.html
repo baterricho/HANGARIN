@@ -70,9 +70,9 @@
                         <strong>{{ today|date:"M j, Y" }}</strong>
                     </div>
                     <div class="user-pill">
-                        <span class="user-pill__avatar">{{ request.user.username|slice:":1"|upper }}</span>
+                        <span class="user-pill__avatar">{{ user_avatar_text }}</span>
                         <div>
-                            <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                            <strong>{{ user_display_name }}</strong>
                         </div>
                     </div>
                     <form method="post" action="{% url 'tasks:logout' %}">

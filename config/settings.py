@@ -104,6 +104,7 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
+SOCIALACCOUNT_ADAPTER = "tasks.adapters.HangarinSocialAccountAdapter"
 
 
 # Database
