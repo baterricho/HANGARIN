@@ -54,6 +54,10 @@ ALLOWED_HOSTS = [
     '*' # Allows access from any ngrok URL automatically
 ]
 
+# Necessary for PythonAnywhere and other proxies to handle HTTPS correctly
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 
 # Application definition
 
@@ -157,6 +161,9 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/dashboard/"
