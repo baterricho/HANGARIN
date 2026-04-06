@@ -45,15 +45,14 @@ SECRET_KEY = "django-insecure-e9l00swz#_r&9i6y1r-!f1$gk+aw5jyy$&#o$796&p)5v1(po7
 DEBUG = os.getenv("DJANGO_DEBUG", "1").lower() in {"1", "true", "yes", "on"}
 
 ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv(
-        "DJANGO_ALLOWED_HOSTS",
-        "127.0.0.1,localhost,testserver,richo.pythonanywhere.com,192.168.100.14",
-    ).split(",")
-    if host.strip()
+    '127.0.0.1',
+    'localhost',
+    'testserver',
+    'richo.pythonanywhere.com',
+    '192.168.100.14',
+    'lithological-midsize-polyphonically.ngrok-free.app',
+    '*' # Allows access from any ngrok URL automatically
 ]
-
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.1.15'] # Replace with your IP
 
 
 # Application definition
