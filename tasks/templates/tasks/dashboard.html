@@ -1,0 +1,139 @@
+{% extends "tasks/base.html" %}
+
+{% block content %}
+    <section class="hero-card hero-card--feature">
+        <div class="hero-card__body">
+            <h3>Welcome back, {{ request.user.get_short_name|default:request.user.username }}</h3>
+            <p class="hero-card__copy">Today is {{ today|date:"l, F j, Y" }}.</p>
+        </div>
+        <div class="hero-stack">
+            {% for metric in support_metrics %}
+                <div class="hero-mini">
+                    <span>{{ metric.label }}</span>
+                    <strong>{{ metric.value }}</strong>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="stats-grid">
+        {% for card in status_cards %}
+            <a class="stat-card stat-card--{{ card.tone }}" href="{{ card.href }}">
+                <span>{{ card.label }}</span>
+                <strong>{{ card.value }}</strong>
+            </a>
+        {% endfor %}
+    </section>
+
+    <section class="insight-grid">
+        <article class="panel">
+            <div class="panel__header">
+                <div>
+                    <p class="eyebrow">Status Flow</p>
+                    <h3>Task Status Overview</h3>
+                </div>
+                <span class="panel__hint">Live completion mix</span>
+            </div>
+            <div class="progress-stack">
+                {% for item in status_breakdown %}
+                    <div class="progress-item">
+                        <div class="progress-item__labels">
+                            <strong>{{ item.label }}</strong>
+                            <span>{{ item.count }} task{{ item.count|pluralize }} - {{ item.percentage }}%</span>
+                        </div>
+                        <div class="progress-track">
+                            <span class="progress-track__fill progress-track__fill--{{ item.slug }}" style="width: {{ item.percentage }}%;"></span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </article>
+
+        <article class="panel">
+            <div class="panel__header">
+                <div>
+                    <p class="eyebrow">Category Loadout</p>
+                    <h3>Top Categories</h3>
+                </div>
+                <span class="panel__hint">Most active buckets</span>
+            </div>
+            <div class="list-block">
+                {% if category_highlights %}
+                    {% for category in category_highlights %}
+                        <div class="list-row">
+                            <span>{{ category.name }}</span>
+                            <strong>{{ category.task_total }} task{{ category.task_total|pluralize }}</strong>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="empty-copy">No categories have been added yet.</p>
+                {% endif %}
+            </div>
+        </article>
+    </section>
+
+    <section class="insight-grid">
+        <article class="panel">
+            <div class="panel__header">
+                <div>
+                    <p class="eyebrow">Recent Activity</p>
+                    <h3>Latest Task Updates</h3>
+                </div>
+                <span class="panel__hint">Recently changed items</span>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Status</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in recent_tasks %}
+                            <tr>
+                                <td>{{ task.title }}</td>
+                                <td>
+                                    <span class="status-pill status-pill--{{ task.status|slugify }}">{{ task.status }}</span>
+                                </td>
+                                <td>{{ task.category.name|default:"Unassigned" }}</td>
+                                <td>{{ task.priority.name|default:"Unassigned" }}</td>
+                                <td>{{ task.updated_at|date:"M j, Y g:i A" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="empty-state">No recent updates yet.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="panel">
+            <div class="panel__header">
+                <div>
+                    <p class="eyebrow">Schedule Watch</p>
+                    <h3>Upcoming Deadlines</h3>
+                </div>
+                <span class="panel__hint">Closest due dates</span>
+            </div>
+            <div class="list-block">
+                {% for task in upcoming_deadlines %}
+                    <div class="deadline-card">
+                        <div>
+                            <strong>{{ task.title }}</strong>
+                            <span>{{ task.deadline|date:"M j, Y g:i A" }}</span>
+                        </div>
+                        <span class="status-pill status-pill--{{ task.status|slugify }}">{{ task.status }}</span>
+                    </div>
+                {% empty %}
+                    <p class="empty-copy">No deadlines are scheduled yet.</p>
+                {% endfor %}
+            </div>
+        </article>
+    </section>
+{% endblock %}

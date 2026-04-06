@@ -1,0 +1,55 @@
+{% extends "tasks/base.html" %}
+
+{% block content %}
+    <section class="panel panel--spacious">
+        <div class="panel__header panel__header--spread">
+            <div>
+                <p class="eyebrow">Editor</p>
+                <h3>{{ form_title }}</h3>
+                <p class="panel__copy">{{ form_description }}</p>
+            </div>
+            <a class="button button--ghost button--compact" href="{{ cancel_url }}">
+                <span class="material-symbols-rounded">arrow_back</span>
+                <span>Back</span>
+            </a>
+        </div>
+
+        <form method="post" class="editor-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="message message--error">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-grid">
+                {% for field in form %}
+                    <div class="form-group {% if field.field.widget.attrs.rows %}form-group--wide{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small>{{ field.help_text }}</small>
+                        {% endif %}
+                        {% if field.errors %}
+                            <div class="field-error">{{ field.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions">
+                <button class="button button--primary" type="submit">
+                    <span class="material-symbols-rounded">save</span>
+                    <span>{{ submit_label }}</span>
+                </button>
+                <a class="button button--ghost" href="{{ cancel_url }}">
+                    <span class="material-symbols-rounded">close</span>
+                    <span>Cancel</span>
+                </a>
+            </div>
+        </form>
+    </section>
+{% endblock %}
