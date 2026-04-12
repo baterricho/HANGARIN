@@ -1,4 +1,6 @@
+import os
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -10,6 +12,7 @@ from django.utils import timezone
 from allauth.socialaccount.models import SocialAccount, SocialLogin
 
 from .adapters import HangarinSocialAccountAdapter
+from .bootstrap import _run_initial_setup
 from .models import Category, Note, Priority, StatusChoices, SubTask, Task
 
 
@@ -189,3 +192,16 @@ class FrontendViewTests(TestCase):
 
         self.assertEqual(social_user.first_name, "Richo")
         self.assertEqual(social_user.last_name, "Baterzal")
+
+
+class BootstrapTests(TestCase):
+    @override_settings(EPHEMERAL_SQLITE_DATABASE=True)
+    @patch("tasks.bootstrap.call_command")
+    def test_initial_setup_seeds_fake_data_for_ephemeral_demo_database(self, mock_call_command):
+        with patch.dict(os.environ, {}, clear=False):
+            _run_initial_setup()
+
+        seeded_commands = [call.args[0] for call in mock_call_command.call_args_list]
+
+        self.assertIn("seed_reference_data", seeded_commands)
+        self.assertIn("seed_fake_data", seeded_commands)

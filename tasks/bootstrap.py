@@ -22,6 +22,25 @@ _REQUIRED_TABLES = {
 }
 
 
+def _env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+
+    return value.lower() in {"1", "true", "yes", "on"}
+
+
+def _env_int(name, default):
+    value = os.getenv(name)
+    if value is None:
+        return default
+
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
 def _is_ephemeral_sqlite_database():
     return bool(getattr(settings, "EPHEMERAL_SQLITE_DATABASE", False))
 
@@ -56,7 +75,7 @@ def _run_initial_setup():
     if not _REQUIRED_TABLES.issubset(_sqlite_tables(db_path)):
         call_command("migrate", interactive=False, run_syncdb=True, verbosity=0)
 
-    from tasks.models import Category, Priority
+    from tasks.models import Category, Priority, Task
 
     if not Priority.objects.exists() or not Category.objects.exists():
         call_command("seed_reference_data", verbosity=0)
@@ -73,6 +92,19 @@ def _run_initial_setup():
                 email=email,
                 password=password,
             )
+
+    should_seed_fake_data = _env_bool(
+        "DJANGO_SEED_FAKE_DATA",
+        default=_is_ephemeral_sqlite_database(),
+    )
+    if should_seed_fake_data and not Task.objects.exists():
+        call_command(
+            "seed_fake_data",
+            tasks=max(1, _env_int("DJANGO_SEED_TASK_COUNT", 12)),
+            max_subtasks=max(1, _env_int("DJANGO_SEED_MAX_SUBTASKS", 3)),
+            max_notes=max(1, _env_int("DJANGO_SEED_MAX_NOTES", 2)),
+            verbosity=0,
+        )
 
 
 def ensure_serverless_database_ready():

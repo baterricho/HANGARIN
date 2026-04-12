@@ -92,6 +92,7 @@ python manage.py seed_fake_data --tasks 20 --max-subtasks 4 --max-notes 3
 
 - Vercel serverless functions cannot use SQLite at `/var/task/db.sqlite3` for login/session writes.
 - If no PostgreSQL variables are present, this project now falls back to `/tmp/hangarin/db.sqlite3` on Vercel and bootstraps the schema on first request.
+- The ephemeral Vercel fallback seeds demo tasks automatically when the database is empty. You can control this with `DJANGO_SEED_FAKE_DATA`, `DJANGO_SEED_TASK_COUNT`, `DJANGO_SEED_MAX_SUBTASKS`, and `DJANGO_SEED_MAX_NOTES`.
 - Add a PostgreSQL database and set `DATABASE_URL` in the Vercel project environment.
 - Set `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=0`, `ALLOWED_HOSTS`, and `CSRF_TRUSTED_ORIGINS` for your live domain.
 - Optional: set `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`, and `DJANGO_SUPERUSER_EMAIL` so the first Vercel boot can create a login account automatically.
