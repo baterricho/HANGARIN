@@ -11,20 +11,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import tempfile
 from pathlib import Path
-
-# Use env variables for security, fallback to defaults for local dev
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-default-local-key')
-
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
-
-# Allow Vercel domain and local testing
-ALLOWED_HOSTS = [
-    'hangarin.vercel.app', 
-    '.vercel.app', 
-    '127.0.0.1', 
-    'localhost'
-]
+from urllib.parse import parse_qs, unquote, urlparse
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -163,10 +152,12 @@ SECRET_KEY = os.getenv(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True # env_bool("DJANGO_DEBUG", default=not IS_VERCEL)
+DEBUG = env_bool("DJANGO_DEBUG", default=not IS_VERCEL)
 PWA_ENABLED = env_bool("PWA_ENABLED", default=not DEBUG)
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", [
+    'hangarin.vercel.app',
+    '.vercel.app',
     '127.0.0.1',
     'localhost',
     'testserver',
