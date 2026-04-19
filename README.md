@@ -19,6 +19,12 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+From the repository root you can also use the included launcher, which uses the project `.venv` automatically:
+
+```powershell
+.\start-local.ps1
+```
+
 If your environment blocks `pip` download, use an existing Python environment with Django and Faker already installed.
 
 ## Social Login Setup

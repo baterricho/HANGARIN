@@ -3,7 +3,7 @@ from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
 from django.urls import reverse
@@ -11,9 +11,46 @@ from django.utils import timezone
 
 from allauth.socialaccount.models import SocialAccount, SocialLogin
 
+from config import settings as project_settings
+
 from .adapters import HangarinSocialAccountAdapter
 from .bootstrap import _run_initial_setup
 from .models import Category, Note, Priority, StatusChoices, SubTask, Task
+
+
+class DatabaseSettingsTests(SimpleTestCase):
+    def test_build_database_settings_accepts_vercel_postgres_url_variants(self):
+        database_settings = project_settings.build_database_settings(
+            "prisma+postgres://demo-user:demo-pass@example.com:5432/hangarin?sslmode=require"
+        )
+
+        self.assertEqual(
+            database_settings["default"]["ENGINE"],
+            "django.db.backends.postgresql",
+        )
+        self.assertEqual(database_settings["default"]["NAME"], "hangarin")
+        self.assertEqual(database_settings["default"]["HOST"], "example.com")
+        self.assertEqual(database_settings["default"]["PORT"], "5432")
+        self.assertEqual(database_settings["default"]["OPTIONS"]["sslmode"], "require")
+
+    def test_build_database_settings_falls_back_to_sqlite_on_vercel_for_invalid_url(self):
+        with patch.object(project_settings, "IS_VERCEL", True):
+            database_settings = project_settings.build_database_settings(
+                "mysql://demo-user:demo-pass@example.com:3306/hangarin"
+            )
+
+        self.assertEqual(
+            database_settings["default"]["ENGINE"],
+            "django.db.backends.sqlite3",
+        )
+        self.assertTrue(str(database_settings["default"]["NAME"]).endswith("db.sqlite3"))
+
+    def test_build_database_settings_raises_for_invalid_local_database_url(self):
+        with patch.object(project_settings, "IS_VERCEL", False):
+            with self.assertRaises(ValueError):
+                project_settings.build_database_settings(
+                    "mysql://demo-user:demo-pass@example.com:3306/hangarin"
+                )
 
 
 class FrontendViewTests(TestCase):
@@ -54,51 +91,29 @@ class FrontendViewTests(TestCase):
         )
         self.assertRedirects(response, reverse("tasks:dashboard"))
 
+    @override_settings(GOOGLE_OAUTH_ENABLED=False, GITHUB_OAUTH_ENABLED=False)
     def test_login_page_hides_google_button_without_credentials(self):
         response = self.client.get(reverse("tasks:login"))
         self.assertNotContains(response, "Continue with Google")
         self.assertNotContains(response, "Continue with GitHub")
 
-    @override_settings(
-        GOOGLE_OAUTH_ENABLED=True,
-        SOCIALACCOUNT_PROVIDERS={
-            "google": {
-                "SCOPE": ["profile", "email"],
-                "AUTH_PARAMS": {"access_type": "online"},
-                "APPS": [
-                    {
-                        "client_id": "test-client-id",
-                        "secret": "test-client-secret",
-                        "key": "",
-                    }
-                ],
-            }
-        },
-    )
+    @override_settings(PWA_ENABLED=False)
+    def test_login_page_skips_pwa_registration_when_disabled(self):
+        response = self.client.get(reverse("tasks:login"))
+        self.assertNotContains(response, 'rel="manifest"')
+        self.assertNotContains(response, "navigator.serviceWorker.register")
+
+    @override_settings(GOOGLE_OAUTH_ENABLED=True, GITHUB_OAUTH_ENABLED=False)
     def test_login_page_shows_google_button_when_configured(self):
         response = self.client.get(reverse("tasks:login"))
         self.assertContains(response, "Continue with Google")
-        self.assertContains(response, "/accounts/google/login/")
+        self.assertContains(response, "/accounts/google/login/?process=login")
 
-    @override_settings(
-        GITHUB_OAUTH_ENABLED=True,
-        SOCIALACCOUNT_PROVIDERS={
-            "github": {
-                "SCOPE": ["read:user", "user:email"],
-                "APPS": [
-                    {
-                        "client_id": "test-client-id",
-                        "secret": "test-client-secret",
-                        "key": "",
-                    }
-                ],
-            }
-        },
-    )
+    @override_settings(GOOGLE_OAUTH_ENABLED=False, GITHUB_OAUTH_ENABLED=True)
     def test_login_page_shows_github_button_when_configured(self):
         response = self.client.get(reverse("tasks:login"))
         self.assertContains(response, "Continue with GitHub")
-        self.assertContains(response, "/accounts/github/login/")
+        self.assertContains(response, "/accounts/github/login/?process=login")
 
     def test_dashboard_renders_backend_data(self):
         self.client.force_login(self.user)
@@ -198,7 +213,7 @@ class BootstrapTests(TestCase):
     @override_settings(EPHEMERAL_SQLITE_DATABASE=True)
     @patch("tasks.bootstrap.call_command")
     def test_initial_setup_seeds_fake_data_for_ephemeral_demo_database(self, mock_call_command):
-        with patch.dict(os.environ, {}, clear=False):
+        with patch.dict(os.environ, {}, clear=True):
             _run_initial_setup()
 
         seeded_commands = [call.args[0] for call in mock_call_command.call_args_list]

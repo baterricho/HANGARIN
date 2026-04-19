@@ -5,7 +5,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% progressive_web_app_meta %}
+    {% if PWA_ENABLED %}
+        {% progressive_web_app_meta %}
+    {% endif %}
     <title>{{ page_title }} | Hangarin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -106,6 +108,18 @@
     </div>
 
     <script>
+        if (!{{ PWA_ENABLED|yesno:"true,false" }} && "serviceWorker" in navigator) {
+            navigator.serviceWorker.getRegistrations().then((registrations) => {
+                registrations.forEach((registration) => registration.unregister());
+            });
+
+            if ("caches" in window) {
+                caches.keys().then((keys) => {
+                    keys.forEach((key) => caches.delete(key));
+                });
+            }
+        }
+
         const toggleButton = document.querySelector("[data-sidebar-toggle]");
         const shell = document.querySelector("[data-shell]");
         if (toggleButton && shell) {

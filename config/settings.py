@@ -56,17 +56,44 @@ def env_list(name, default=None):
 IS_VERCEL = bool(os.getenv("VERCEL"))
 
 
-def build_postgres_database(database_url):
-    parsed = urlparse(database_url)
-    scheme = parsed.scheme.split("+", 1)[0]
+def clean_env_value(value):
+    if value is None:
+        return None
 
-    if scheme not in {"postgres", "postgresql"}:
+    value = value.strip().strip('"').strip("'")
+    return value or None
+
+
+def build_sqlite_database(name):
+    return {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": name,
+        }
+    }
+
+
+def build_postgres_database(database_url):
+    database_url = clean_env_value(database_url)
+    parsed = urlparse(database_url)
+    scheme = parsed.scheme.lower()
+
+    if "postgres" not in scheme:
         raise ValueError(f"Unsupported DATABASE_URL scheme: {parsed.scheme}")
+
+    database_name = unquote(parsed.path.lstrip("/"))
+    if not database_name:
+        raise ValueError("DATABASE_URL must include a database name")
+
+    try:
+        port = str(parsed.port or "")
+    except ValueError as exc:
+        raise ValueError(f"Invalid DATABASE_URL port: {parsed.netloc}") from exc
 
     query = parse_qs(parsed.query)
     sslmode = query.get(
         "sslmode",
-        [os.getenv("DB_SSLMODE", "require" if os.getenv("VERCEL") else "prefer")],
+        [os.getenv("DB_SSLMODE", "require" if IS_VERCEL else "prefer")],
     )[0]
 
     options = {}
@@ -75,45 +102,40 @@ def build_postgres_database(database_url):
 
     return {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": unquote(parsed.path.lstrip("/")),
+        "NAME": database_name,
         "USER": unquote(parsed.username or ""),
         "PASSWORD": unquote(parsed.password or ""),
         "HOST": parsed.hostname or "",
-        "PORT": str(parsed.port or ""),
-        "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "0" if os.getenv("VERCEL") else "60")),
+        "PORT": port,
+        "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "0" if IS_VERCEL else "60")),
         "DISABLE_SERVER_SIDE_CURSORS": env_bool("DB_DISABLE_SERVER_SIDE_CURSORS", default=True),
         "OPTIONS": options,
     }
 
 
 def get_database_url():
-    return (
-        os.getenv("DATABASE_URL")
-        or os.getenv("POSTGRES_URL_NON_POOLING")
-        or os.getenv("POSTGRES_URL")
-    )
+    for env_name in ("DATABASE_URL", "POSTGRES_URL_NON_POOLING", "POSTGRES_URL"):
+        value = clean_env_value(os.getenv(env_name))
+        if value:
+            return value
+
+    return None
 
 
 def build_database_settings(database_url=None):
-    database_url = database_url or get_database_url()
+    database_url = clean_env_value(database_url) or get_database_url()
 
     if database_url:
-        return {"default": build_postgres_database(database_url)}
+        try:
+            return {"default": build_postgres_database(database_url)}
+        except ValueError:
+            if not IS_VERCEL:
+                raise
 
     if IS_VERCEL:
-        return {
-            "default": {
-                "ENGINE": "django.db.backends.sqlite3",
-                "NAME": Path(tempfile.gettempdir()) / "hangarin" / "db.sqlite3",
-            }
-        }
+        return build_sqlite_database(Path(tempfile.gettempdir()) / "hangarin" / "db.sqlite3")
 
-    return {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+    return build_sqlite_database(BASE_DIR / "db.sqlite3")
 
 
 # Quick-start development settings - unsuitable for production
@@ -129,7 +151,8 @@ SECRET_KEY = os.getenv(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env_bool("DJANGO_DEBUG", default=not IS_VERCEL)
+DEBUG = True # env_bool("DJANGO_DEBUG", default=not IS_VERCEL)
+PWA_ENABLED = env_bool("PWA_ENABLED", default=not DEBUG)
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", [
     '127.0.0.1',
@@ -150,8 +173,8 @@ if os.getenv("VERCEL_URL"):
         CSRF_TRUSTED_ORIGINS.append(vercel_origin)
 
 # Necessary for PythonAnywhere and other proxies to handle HTTPS correctly
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-USE_X_FORWARDED_HOST = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# USE_X_FORWARDED_HOST = True
 
 
 # Application definition
@@ -196,6 +219,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "tasks.context_processors.app_flags",
             ],
         },
     },
@@ -213,8 +237,10 @@ SOCIALACCOUNT_ADAPTER = "tasks.adapters.HangarinSocialAccountAdapter"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASE_URL = get_database_url()
-EPHEMERAL_SQLITE_DATABASE = IS_VERCEL and not DATABASE_URL
 DATABASES = build_database_settings(DATABASE_URL)
+EPHEMERAL_SQLITE_DATABASE = (
+    IS_VERCEL and DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
+)
 
 
 # Password validation
@@ -323,6 +349,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # --- Progressive Web App Settings ---
 PWA_APP_NAME = 'Hangarin'
 PWA_APP_DESCRIPTION = "A Progressive Web App version of Hangarin"
+PWA_APP_DEBUG_MODE = DEBUG
 PWA_APP_THEME_COLOR = '#0A0A0A'
 PWA_APP_BACKGROUND_COLOR = '#FFFFFF'
 PWA_APP_DISPLAY = 'standalone'
@@ -351,4 +378,8 @@ PWA_APP_ICONS_APPLE = [
     }
 ]
 PWA_APP_DIR = 'ltr'
-PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static', 'js', 'serviceworker.js')
+PWA_SERVICE_WORKER_PATH = (
+    os.path.join(BASE_DIR, 'static', 'js', 'serviceworker.js')
+    if PWA_ENABLED
+    else os.path.join(BASE_DIR, 'config', 'serviceworker_dev.js')
+)

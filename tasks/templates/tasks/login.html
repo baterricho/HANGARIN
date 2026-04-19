@@ -1,11 +1,13 @@
-{% load static socialaccount %}
+{% load static %}
 {% load pwa %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% progressive_web_app_meta %}
+    {% if PWA_ENABLED %}
+        {% progressive_web_app_meta %}
+    {% endif %}
     <title>Login | Hangarin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +25,19 @@
     <link rel="stylesheet" href="{% static 'tasks/material-admin.css' %}">
 </head>
 <body class="login-page">
+    <script>
+        if (!{{ PWA_ENABLED|yesno:"true,false" }} && "serviceWorker" in navigator) {
+            navigator.serviceWorker.getRegistrations().then((registrations) => {
+                registrations.forEach((registration) => registration.unregister());
+            });
+
+            if ("caches" in window) {
+                caches.keys().then((keys) => {
+                    keys.forEach((key) => caches.delete(key));
+                });
+            }
+        }
+    </script>
     <div class="login-scene"></div>
     <main class="login-shell">
         <section class="login-panel">
@@ -66,7 +81,7 @@
                         {% if google_oauth_enabled %}
                             <form
                                 method="post"
-                                action="{% provider_login_url 'google' process='login' %}"
+                                action="{% url 'google_login' %}?process=login"
                                 class="social-login-form"
                             >
                                 {% csrf_token %}
@@ -81,7 +96,7 @@
                         {% if github_oauth_enabled %}
                             <form
                                 method="post"
-                                action="{% provider_login_url 'github' process='login' %}"
+                                action="{% url 'github_login' %}?process=login"
                                 class="social-login-form"
                             >
                                 {% csrf_token %}
