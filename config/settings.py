@@ -11,9 +11,21 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
-import tempfile
 from pathlib import Path
-from urllib.parse import parse_qs, unquote, urlparse
+
+# Use env variables for security, fallback to defaults for local dev
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-default-local-key')
+
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+
+# Allow Vercel domain and local testing
+ALLOWED_HOSTS = [
+    'hangarin.vercel.app', 
+    '.vercel.app', 
+    '127.0.0.1', 
+    'localhost'
+]
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
