@@ -66,8 +66,11 @@ If you deploy the app, create a second GitHub OAuth App or update the callback U
 
 ```powershell
 python manage.py seed_reference_data
+python manage.py seed_demo_data
 python manage.py seed_fake_data --tasks 20 --max-subtasks 4 --max-notes 3
 ```
+
+Use `seed_demo_data --clear-demo` to replace the fixed demo tasks cleanly.
 
 ## Admin Coverage
 
