@@ -73,43 +73,37 @@
                     {% endif %}
                     <button class="button button--primary button--wide" type="submit">Enter Dashboard</button>
                 </form>
-                {% if google_oauth_enabled or github_oauth_enabled %}
-                    <div class="login-separator" aria-hidden="true">
-                        <span>or</span>
-                    </div>
-                    <div class="social-login-stack">
-                        {% if google_oauth_enabled %}
-                            <form
-                                method="post"
-                                action="{% url 'google_login' %}?process=login"
-                                class="social-login-form"
-                            >
-                                {% csrf_token %}
-                                {% if next %}
-                                    <input type="hidden" name="next" value="{{ next }}">
-                                {% endif %}
-                                <button class="button button--wide social-button social-button--google" type="submit">
-                                    <span>Continue with Google</span>
-                                </button>
-                            </form>
+                <div class="login-separator" aria-hidden="true">
+                    <span>or</span>
+                </div>
+                <div class="social-login-stack">
+                    <form
+                        method="post"
+                        action="{% url 'google_login' %}?process=login"
+                        class="social-login-form"
+                    >
+                        {% csrf_token %}
+                        {% if next %}
+                            <input type="hidden" name="next" value="{{ next }}">
                         {% endif %}
-                        {% if github_oauth_enabled %}
-                            <form
-                                method="post"
-                                action="{% url 'github_login' %}?process=login"
-                                class="social-login-form"
-                            >
-                                {% csrf_token %}
-                                {% if next %}
-                                    <input type="hidden" name="next" value="{{ next }}">
-                                {% endif %}
-                                <button class="button button--wide social-button social-button--github" type="submit">
-                                    <span>Continue with GitHub</span>
-                                </button>
-                            </form>
+                        <button class="button button--wide social-button social-button--google" type="submit">
+                            <span>Continue with Google</span>
+                        </button>
+                    </form>
+                    <form
+                        method="post"
+                        action="{% url 'github_login' %}?process=login"
+                        class="social-login-form"
+                    >
+                        {% csrf_token %}
+                        {% if next %}
+                            <input type="hidden" name="next" value="{{ next }}">
                         {% endif %}
-                    </div>
-                {% endif %}
+                        <button class="button button--wide social-button social-button--github" type="submit">
+                            <span>Continue with GitHub</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </section>
     </main>
