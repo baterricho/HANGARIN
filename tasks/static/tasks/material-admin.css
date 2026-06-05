@@ -1068,6 +1068,12 @@ a {
     border-color: rgba(255, 255, 255, 0.38);
 }
 
+.login-card .social-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.58;
+    transform: none;
+}
+
 .login-card .message {
     border-color: rgba(255, 255, 255, 0.08);
     background: rgba(13, 22, 38, 0.015);

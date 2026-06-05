@@ -92,10 +92,17 @@ class FrontendViewTests(TestCase):
         self.assertRedirects(response, reverse("tasks:dashboard"))
 
     @override_settings(GOOGLE_OAUTH_ENABLED=False, GITHUB_OAUTH_ENABLED=False)
-    def test_login_page_shows_social_buttons(self):
+    def test_login_page_disables_social_buttons_without_credentials(self):
         response = self.client.get(reverse("tasks:login"))
         self.assertContains(response, "Continue with Google")
         self.assertContains(response, "Continue with GitHub")
+        self.assertContains(response, 'type="button" disabled')
+        self.assertNotContains(response, "/accounts/google/login/?process=login")
+        self.assertNotContains(response, "/accounts/github/login/?process=login")
+
+    @override_settings(GOOGLE_OAUTH_ENABLED=True, GITHUB_OAUTH_ENABLED=True)
+    def test_login_page_enables_social_buttons_with_credentials(self):
+        response = self.client.get(reverse("tasks:login"))
         self.assertContains(response, "/accounts/google/login/?process=login")
         self.assertContains(response, "/accounts/github/login/?process=login")
 
